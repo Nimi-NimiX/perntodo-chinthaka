@@ -1,43 +1,49 @@
-import React, { useEffect, useState } from 'react';
-import EditTodos from './EditTodos';
+import React, { useEffect, useState } from "react";
+import EditTodos from "./EditTodos";
+import { fetchTodos } from "../API/fetchTodos";
+import { deleteTodo } from "../API/deleteTodo";
 
 const ListTodos = () => {
-    const [todos, setTodos] = useState('');
+    const [todos, setTodos] = useState(null);
 
-    const getTodos = async () => {
-        try {
-            const res = await fetch("http://localhost:3000/todos");
-            const jsonData = await res.json();
+    /*
+    call fetchTodos() from fetchTodos.js and set the response to todos state.
+    cleanup function is used to prevent memory leak.
+    */
+    useEffect(() => {
+        let isMounted = true;
 
-            setTodos(jsonData);
-        } catch (error) {
-            console.error(error.message);
-        }
-    };
+        const res = fetchTodos();
+        res.then((res) => {
+            if (isMounted) {
+                setTodos(res);
+            } else {
+                setTodos([]);
+            }
+        });
 
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    /*
+    call deleteTodo() from deleteTodo.js and pass the todo_id as an argument. 
+    */
     const deelteTodo = async (id) => {
         try {
-            const res = await fetch(`http://localhost:3000/todos/${id}`, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-            });
-
-            const jsonData = await res.json();
-            console.log(jsonData);
-
-            setTodos(todos.filter(todo => todo.todo_id !== id));
+            const res = await deleteTodo(id);
+            if (res.status === 200) {
+                setTodos(todos.filter((todo) => todo.todo_id !== id));
+            }
         } catch (error) {
-            console.error(error.message);
+            console.error(error);
         }
     };
-
-    useEffect(() => {
-        getTodos();
-    }, []);
 
     return (
         <>
-            <table id='table' className="table mt-5 text-center">
+            <table id="table" className="table mt-5 text-center">
                 <thead>
                     <tr>
                         <th>Description</th>
@@ -46,30 +52,40 @@ const ListTodos = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {
-                        todos === '' ?
-                            <tr>
-                                <td colSpan="3">
-                                    <div className="spinner-border text-primary m-5" role="status">
-                                        <span className="visually-hidden">Loading...</span>
-                                    </div>
+                    {todos === null ? (
+                        <tr>
+                            <td colSpan="3">
+                                <div className="spinner-border text-primary m-5" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    ) : todos.length === 0 ? (
+                        <tr>
+                            <td colSpan="3" className="p-5">
+                                <h4 className="text-center">No Todos Found !</h4>
+                            </td>
+                        </tr>
+                    ) : (
+                        todos.map((todo) => (
+                            <tr key={todo.todo_id}>
+                                <td className="align-middle">{todo.description}</td>
+                                <td>
+                                    <EditTodos todo={todo} />
+                                </td>
+                                <td>
+                                    <button
+                                        className="btn btn-danger"
+                                        onClick={() => {
+                                            deelteTodo(todo.todo_id);
+                                        }}
+                                    >
+                                        Delete
+                                    </button>
                                 </td>
                             </tr>
-                            :
-                            todos.length === 0 ?
-                                <tr>
-                                    <td colSpan="3" className='p-5'>
-                                        <h4 className="text-center">No Todos Found !</h4>
-                                    </td>
-                                </tr> :
-                                todos.map(todo => (
-                                    <tr key={todo.todo_id}>
-                                        <td className='align-middle'>{todo.description}</td>
-                                        <td><EditTodos todo={todo} /></td>
-                                        <td><button className="btn btn-danger" onClick={() => { deelteTodo(todo.todo_id) }}>Delete</button></td>
-                                    </tr>
-                                ))
-                    }
+                        ))
+                    )}
                 </tbody>
             </table>
         </>
