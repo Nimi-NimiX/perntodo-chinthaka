@@ -1,30 +1,68 @@
-import React, { useEffect, useState } from 'react';
-import InputTodos from './components/InputTodos';
-import ListTodos from './components/ListTodos';
+import React, { useEffect, useState } from "react";
+import InputTodos from "./components/InputTodos";
+import ListTodos from "./components/ListTodos";
+import { Box, Button, CssBaseline, createTheme } from "@mui/material";
+import { ThemeProvider } from "@emotion/react";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 
 function App() {
-
-  const [savedTheme, setSavedTheme] = useState(localStorage.getItem('theme') || 'light')
+  const [themeMode, setThemeMode] = useState(localStorage.getItem("theme"));
 
   useEffect(() => {
-    document.body.dataset.bsTheme = savedTheme;
-  }, [savedTheme])
+    localStorage.setItem("theme", themeMode);
+  }, [themeMode]);
 
-  function changeTheme() {
-    const newTheme = savedTheme === 'light' ? 'dark' : 'light'
-    setSavedTheme(newTheme)
-    localStorage.setItem('theme', newTheme)
-  }
+  const theme = createTheme({
+    palette: {
+      mode: themeMode,
+    },
+    typography: {
+      fontFamily: "Poppins",
+    },
+  });
+
+  const changeTheme = () => {
+    if (themeMode === "light") {
+      setThemeMode("dark");
+    } else {
+      setThemeMode("light");
+    }
+  };
 
   return (
     <>
-      <div className="container">
-        <button className='position-absolute bottom-0 end-0 m-5 btn' onClick={changeTheme}> {
-          savedTheme === 'light' ? <i className="bi bi-moon-fill"></i> : <i className="bi bi-brightness-high-fill"></i>
-        } </button>
-        <InputTodos />
-        <ListTodos />
-      </div>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Box
+          sx={{
+            bgcolor: "background.paper",
+            height: "100vh",
+            width: "100vw",
+            padding: "5em",
+            margin: "0px",
+          }}
+        >
+          <Button
+            onClick={changeTheme}
+            style={{
+              position: "absolute",
+              top: "2rem",
+              right: "2rem",
+              border: "none",
+              backgroundColor: "transparent"
+            }}
+          >
+            {theme.palette.mode === "light" ? (
+              <DarkModeIcon />
+            ) : (
+              <LightModeIcon color="info" />
+            )}
+          </Button>
+          <InputTodos />
+          <ListTodos />
+        </Box>
+      </ThemeProvider>
     </>
   );
 }
