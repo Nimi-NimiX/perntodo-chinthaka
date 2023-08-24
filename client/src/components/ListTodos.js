@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { fetchTodos } from "../API/fetchTodos";
 import { deleteTodo } from "../API/deleteTodo";
 import Table from '@mui/material/Table';
@@ -10,9 +10,11 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { Button } from "@mui/material";
 import EditTodos from "./EditTodos";
+import { Store } from "../utils/store";
 
 const ListTodos = () => {
-    const [todos, setTodos] = useState([]);
+
+    let todoState = Store.useContainer()
 
     /**
      * call fetchTodos() from fetchTodos.js and set the response to todos state.
@@ -24,9 +26,9 @@ const ListTodos = () => {
         const res = fetchTodos();
         res.then((res) => {
             if (isMounted) {
-                setTodos(res);
+                todoState.setTodos(res);
             } else {
-                setTodos([]);
+                todoState.setTodos([]);
             }
         });
 
@@ -42,7 +44,7 @@ const ListTodos = () => {
         try {
             const res = await deleteTodo(id);
             if (res.status === 200) {
-                setTodos(todos.filter((todo) => todo.todo_id !== id));
+                todoState.deleteTodo(id);
             }
         } catch (error) {
             console.error(error);
@@ -61,7 +63,7 @@ const ListTodos = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {todos.map((todo) => (
+                        {todoState.todos.map((todo) => (
                             <TableRow
                                 key={todo.todo_id}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}

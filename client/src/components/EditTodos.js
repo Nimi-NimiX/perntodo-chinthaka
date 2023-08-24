@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { updateTodo } from "../API/updateTodo";
+import { Store } from "../utils/store";
 import {
     Button,
     Dialog,
@@ -13,6 +14,7 @@ import {
 const EditTodos = ({ todo }) => {
     const [open, openchange] = useState(false);
     const [description, setDescription] = useState(todo.description);
+    const toodState = Store.useContainer();
 
     const openModel = () => {
         openchange(true);
@@ -30,7 +32,11 @@ const EditTodos = ({ todo }) => {
                 description: description,
             });
             if (res.status === 200) {
-                window.location = "/";
+                toodState.updateTodo({
+                    id: todo.todo_id,
+                    description: description,
+                })
+                openchange(false);
             }
         } catch (error) {
             console.error(error.message);

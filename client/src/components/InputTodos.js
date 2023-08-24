@@ -1,19 +1,22 @@
 import React, { useState } from "react";
 import { addTodo } from "../API/addTodo";
-import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import {
     Alert,
     AlertTitle,
+    Button,
     Collapse,
     IconButton,
     Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { Store } from "../utils/store";
 
 const InputTodo = () => {
     const [description, setDescription] = useState("");
     const [alert, setAlert] = useState(false);
+    const todoState = Store.useContainer();
+
     const onsubmitform = async (e) => {
         e.preventDefault();
 
@@ -29,7 +32,8 @@ const InputTodo = () => {
         try {
             const res = await addTodo({ description: description });
             if (res.status === 200) {
-                window.location.reload();
+                todoState.addTodo(res.data);
+                setDescription("");
             }
         } catch (error) { }
     };
