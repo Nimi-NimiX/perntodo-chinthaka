@@ -1,4 +1,5 @@
 const pool = require("../database/connection");
+const logger = require("../utils/logger");
 
 module.exports = {
     /**
@@ -9,7 +10,7 @@ module.exports = {
             const allTodos = await pool.query("SELECT * FROM todo");
             res.status(200).json(allTodos.rows);
         } catch (error) {
-            console.error(error.message);
+            logger.error(error.message);
         }
     },
 
@@ -25,7 +26,7 @@ module.exports = {
             );
             res.json(getTodo.rows[0]);
         } catch (error) {
-            console.error(error.message);
+            logger.error(error.message);
         }
     },
 
@@ -41,7 +42,7 @@ module.exports = {
             );
             res.json(newTodo.rows[0]);
         } catch (error) {
-            console.error(error.message);
+            logger.error(error.message);
         }
     },
 
@@ -58,7 +59,7 @@ module.exports = {
             );
             res.status(200).json("Todo was updated successfully");
         } catch (error) {
-            console.error(error.message);
+            logger.error(error.message);
         }
     },
 
@@ -74,7 +75,7 @@ module.exports = {
             );
             res.status(200).json("Todo was deleted successfully");
         } catch (error) {
-            console.error(error.message);
+            logger.error(error.message);
         }
     },
 };
