@@ -12,15 +12,15 @@ import {
 } from "@mui/material";
 
 const EditTodos = ({ todo }) => {
-    const [open, openchange] = useState(false);
+    const [model, setModel] = useState(false);
     const [description, setDescription] = useState(todo.description);
     const toodState = Store.useContainer();
 
     const openModel = () => {
-        openchange(true);
+        setModel(true);
     };
     const closepopup = () => {
-        openchange(false);
+        setModel(false);
         setDescription(todo.description);
     };
 
@@ -36,7 +36,7 @@ const EditTodos = ({ todo }) => {
                     id: todo.todo_id,
                     description: description,
                 })
-                openchange(false);
+                setModel(false);
             }
         } catch (error) {
             console.error(error.message);
@@ -50,7 +50,7 @@ const EditTodos = ({ todo }) => {
             </Button>
 
             <Dialog
-                open={open}
+                open={model}
                 onClose={closepopup}
                 fullWidth
                 maxWidth="sm"
