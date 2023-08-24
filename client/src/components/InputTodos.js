@@ -2,19 +2,17 @@ import React, { useState } from "react";
 import { addTodo } from "../API/addTodo";
 import TextField from "@mui/material/TextField";
 import {
-    Alert,
-    AlertTitle,
-    Button,
     Collapse,
-    IconButton,
-    Typography,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import { Store } from "../utils/store";
+import Header from '../styles/Typeography/Heading';
+import AddButton from '../styles/Buttons/AddButton';
+import WarnAlert from "../styles/Alert/WarnAlert";
 
 const InputTodo = () => {
     const [description, setDescription] = useState("");
     const [alert, setAlert] = useState(false);
+    const [adding, setAdding] = useState(false);
     const todoState = Store.useContainer();
 
     const onsubmitform = async (e) => {
@@ -30,19 +28,22 @@ const InputTodo = () => {
         }
 
         try {
+            setAdding(true);
             const res = await addTodo({ description: description });
             if (res.status === 200) {
                 todoState.addTodo(res.data);
                 setDescription("");
+                setAdding(false);
             }
         } catch (error) { }
     };
 
     return (
         <>
-            <Typography variant="h4" align="center" color="text.secondary">
+            <Header>
                 Todo List App
-            </Typography>
+            </Header>
+
             <form className="d-flex gap-2 mt-5 mb-3" onSubmit={onsubmitform}>
                 <TextField
                     fullWidth
@@ -53,30 +54,15 @@ const InputTodo = () => {
                         setDescription(e.target.value);
                     }}
                 />
-                <Button variant="contained" color="primary" onClick={onsubmitform}>
+                <AddButton onClick={onsubmitform} loading={adding}>
                     Add
-                </Button>
+                </AddButton>
             </form>
+
             <Collapse in={alert}>
-                <Alert
-                    severity="error"
-                    action={
-                        <IconButton
-                            aria-label="close"
-                            color="inherit"
-                            size="small"
-                            onClick={() => {
-                                setAlert(false);
-                            }}
-                        >
-                            <CloseIcon fontSize="inherit" />
-                        </IconButton>
-                    }
-                    sx={{ mb: 2 }}
-                >
-                    <AlertTitle>Error</AlertTitle>
+                <WarnAlert setAlert={setAlert}>
                     Please enter a valid todo description
-                </Alert>
+                </WarnAlert>
             </Collapse>
         </>
     );
