@@ -1,30 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import InputTodos from './components/InputTodos';
-import ListTodos from './components/ListTodos';
+import React, { useState } from "react";
+import InputTodos from "./components/InputTodos";
+import ListTodos from "./components/ListTodos";
+import { CssBaseline } from "@mui/material";
+import { ThemeProvider } from "@emotion/react";
+import { Store } from "./utils/store";
+import { changeTheme } from "./utils/themeProvider";
+import ThemeButton from "./styles/Buttons/ThemeButton";
+import MainContainer from "./styles/Box/MainContainer";
 
 function App() {
+  const [mode, setMode] = useState(
+    localStorage.getItem("theme") || "light"
+  );
+  const Theme = changeTheme(mode);
 
-  const [savedTheme, setSavedTheme] = useState(localStorage.getItem('theme') || 'light')
-
-  useEffect(() => {
-    document.body.dataset.bsTheme = savedTheme;
-  }, [savedTheme])
-
-  function changeTheme() {
-    const newTheme = savedTheme === 'light' ? 'dark' : 'light'
-    setSavedTheme(newTheme)
-    localStorage.setItem('theme', newTheme)
+  function toggleTheme() {
+    if (mode === "light") {
+      setMode("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      setMode("light");
+      localStorage.setItem("theme", "light");
+    }
   }
 
   return (
     <>
-      <div className="container">
-        <button className='position-absolute bottom-0 end-0 m-5 btn' onClick={changeTheme}> {
-          savedTheme === 'light' ? <i className="bi bi-moon-fill"></i> : <i className="bi bi-brightness-high-fill"></i>
-        } </button>
-        <InputTodos />
-        <ListTodos />
-      </div>
+      <Store.Provider>
+        <ThemeProvider theme={Theme}>
+          <CssBaseline />
+          <MainContainer>
+            <ThemeButton onClick={toggleTheme} mode={mode} />
+            <InputTodos />
+            <ListTodos />
+          </MainContainer>
+        </ThemeProvider>
+      </Store.Provider>
     </>
   );
 }

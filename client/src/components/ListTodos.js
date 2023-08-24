@@ -1,77 +1,82 @@
-import React, { useEffect, useState } from 'react';
-import EditTodos from './EditTodos';
+import React, { useEffect } from "react";
+import { fetchTodos } from "../API/fetchTodos";
+import { deleteTodo } from "../API/deleteTodo";
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import { Button } from "@mui/material";
+import EditTodos from "./EditTodos";
+import { Store } from "../utils/store";
 
 const ListTodos = () => {
-    const [todos, setTodos] = useState('');
 
-    const getTodos = async () => {
-        try {
-            const res = await fetch("http://localhost:3000/todos");
-            const jsonData = await res.json();
+    let todoState = Store.useContainer()
 
-            setTodos(jsonData);
-        } catch (error) {
-            console.error(error.message);
-        }
-    };
+    /**
+     * call fetchTodos() from fetchTodos.js and set the response to todos state.
+     * cleanup function is used to prevent memory leaks.
+     */
+    useEffect(() => {
+        let isMounted = true;
 
+        const res = fetchTodos();
+        res.then((res) => {
+            if (isMounted) {
+                todoState.setTodos(res);
+            } else {
+                todoState.setTodos([]);
+            }
+        });
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    /**
+        call deleteTodo() from deleteTodo.js and pass the todo_id as an argument. 
+      */
     const deelteTodo = async (id) => {
         try {
-            const res = await fetch(`http://localhost:3000/todos/${id}`, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-            });
-
-            const jsonData = await res.json();
-            console.log(jsonData);
-
-            setTodos(todos.filter(todo => todo.todo_id !== id));
+            const res = await deleteTodo(id);
+            if (res.status === 200) {
+                todoState.deleteTodo(id);
+            }
         } catch (error) {
-            console.error(error.message);
         }
     };
-
-    useEffect(() => {
-        getTodos();
-    }, []);
 
     return (
         <>
-            <table id='table' className="table mt-5 text-center">
-                <thead>
-                    <tr>
-                        <th>Description</th>
-                        <th>Edit</th>
-                        <th>Delete</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {
-                        todos === '' ?
-                            <tr>
-                                <td colSpan="3">
-                                    <div className="spinner-border text-primary m-5" role="status">
-                                        <span className="visually-hidden">Loading...</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            :
-                            todos.length === 0 ?
-                                <tr>
-                                    <td colSpan="3" className='p-5'>
-                                        <h4 className="text-center">No Todos Found !</h4>
-                                    </td>
-                                </tr> :
-                                todos.map(todo => (
-                                    <tr key={todo.todo_id}>
-                                        <td className='align-middle'>{todo.description}</td>
-                                        <td><EditTodos todo={todo} /></td>
-                                        <td><button className="btn btn-danger" onClick={() => { deelteTodo(todo.todo_id) }}>Delete</button></td>
-                                    </tr>
-                                ))
-                    }
-                </tbody>
-            </table>
+            <TableContainer component={Paper}>
+                <Table sx={{ minWidth: 450 }} aria-label="simple table">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Description</TableCell>
+                            <TableCell align="center">Edit</TableCell>
+                            <TableCell align="center">Delete</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {todoState.todos.map((todo) => (
+                            <TableRow
+                                key={todo.todo_id}
+                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            >
+                                <TableCell component="th" scope="row">
+                                    {todo.description}
+                                </TableCell>
+                                <TableCell align="center"> <EditTodos todo={todo} /> </TableCell>
+                                <TableCell align="center"> <Button variant="contained" color="error" onClick={() => deelteTodo(todo.todo_id)}>Delete</Button> </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </>
     );
 };
