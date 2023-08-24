@@ -47,7 +47,6 @@ const ListTodos = () => {
                 todoState.deleteTodo(id);
             }
         } catch (error) {
-            console.error(error);
         }
     };
 

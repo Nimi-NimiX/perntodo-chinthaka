@@ -39,7 +39,6 @@ const EditTodos = ({ todo }) => {
                 setModel(false);
             }
         } catch (error) {
-            console.error(error.message);
         }
     };
 
