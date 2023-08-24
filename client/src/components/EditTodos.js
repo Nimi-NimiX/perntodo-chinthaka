@@ -1,21 +1,17 @@
 import React, { useState } from "react";
+import { updateTodo } from "../API/updateTodo";
 
 const EditTodos = ({ todo }) => {
 
     const [description, setDescription] = useState(todo.description);
 
-    const updateTodo = async (e) => {
+    const editTodo = async (e) => {
         e.preventDefault();
-        const body = { description };
         try {
-            const res = await fetch(`http://localhost:3000/todos/${todo.todo_id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
-
-            console.log(res);
-            window.location = "/";
+            const res = await updateTodo({ id: todo.todo_id, description: description });
+            if (res.status === 200) {
+                window.location = "/";
+            }
         } catch (error) {
             console.error(error.message);
         }
@@ -42,7 +38,7 @@ const EditTodos = ({ todo }) => {
                         </div>
 
                         <div className="modal-footer">
-                            <button type="submit" className="btn btn-warning" ty data-bs-dismiss="modal" onClick={(e) => { updateTodo(e) }}>Edit</button>
+                            <button type="submit" className="btn btn-warning" ty data-bs-dismiss="modal" onClick={(e) => { editTodo(e) }}>Edit</button>
                             <button type="button" className="btn btn-danger" data-bs-dismiss="modal" onClick={() => { setDescription(todo.description) }}>Close</button>
                         </div>
 

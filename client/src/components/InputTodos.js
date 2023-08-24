@@ -1,35 +1,20 @@
 import React, { useState } from 'react';
+import { addTodo } from '../API/addTodo';
 
 const InputTodo = () => {
 
     const [description, setDescription] = useState('');
 
     const onsubmitform = async (e) => {
-        if (description === '') {
-            e.preventDefault();
-            let alert = document.getElementById('alert');
-            alert.innerHTML = `
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <strong>Alert!</strong>  You should write something in the input field.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            `;
-            setTimeout(() => {
-                alert.innerHTML = '';
-            }, 2500);
-            return;
-        }
-        
-        try {
-            const res = await fetch("http://localhost:3000/todos", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ description })
-            });
+        e.preventDefault();
 
-            console.log(res);
+        try {
+            const res = await addTodo({ description: description });
+            if (res.status === 200) {
+                window.location.reload();
+            }
         } catch (error) {
-            console.error(error.message);
+
         }
     };
 
